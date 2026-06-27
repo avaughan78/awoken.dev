@@ -11,9 +11,9 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #07070f;
+            --bg: #06060e;
             --fg: #d0d0e0;
-            --dim: #3a3a50;
+            --dim: #38384e;
         }
 
         html, body {
@@ -23,38 +23,45 @@
             color: var(--fg);
         }
 
-        /* Scan-lines */
-        body::after {
-            content: '';
+        #aurora {
             position: fixed;
             inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 3px,
-                rgba(0,0,0,0.06) 3px,
-                rgba(0,0,0,0.06) 4px
-            );
-            pointer-events: none;
-            z-index: 200;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         .grid {
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+                linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
             background-size: 55px 55px;
-            z-index: 1;
+            z-index: 2;
+            pointer-events: none;
         }
 
         .vignette {
             position: fixed;
             inset: 0;
-            background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.82) 100%);
-            z-index: 2;
+            background: radial-gradient(ellipse at center, transparent 25%, rgba(4,4,12,0.92) 100%);
+            z-index: 3;
             pointer-events: none;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.045) 3px,
+                rgba(0,0,0,0.045) 4px
+            );
+            pointer-events: none;
+            z-index: 4;
         }
 
         .stage {
@@ -67,28 +74,16 @@
             z-index: 10;
         }
 
-        .eye-wrap {
-            width: 180px;
-            margin-bottom: 52px;
-        }
-
-        .eye-wrap svg {
-            width: 100%;
-            overflow: visible;
-            filter:
-                drop-shadow(0 0 10px rgba(180,180,220,0.18))
-                drop-shadow(0 0 30px rgba(180,180,220,0.07));
-        }
-
         .title {
             font-family: 'Inter', -apple-system, sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 200;
             letter-spacing: 0.65em;
             text-transform: uppercase;
             color: var(--fg);
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             position: relative;
+            user-select: none;
         }
 
         .title::before,
@@ -99,32 +94,32 @@
             opacity: 0;
             pointer-events: none;
         }
-        .title::before { color: #9090ff; }
-        .title::after  { color: #ff7070; }
+        .title::before { color: #8888ff; }
+        .title::after  { color: #ff6666; }
 
-        .title.glitching::before { animation: glitch-a 0.28s steps(1) forwards; }
-        .title.glitching::after  { animation: glitch-b 0.28s steps(1) forwards; }
+        .title.glitching::before { animation: glitch-a 0.3s steps(1) forwards; }
+        .title.glitching::after  { animation: glitch-b 0.3s steps(1) forwards; }
 
         @keyframes glitch-a {
             0%   { opacity: 0; }
-            15%  { opacity: 0.8; transform: translate(-2px, 0); clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%); }
+            15%  { opacity: 0.85; transform: translate(-2px, 0); clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%); }
             45%  { opacity: 0; }
-            65%  { opacity: 0.6; transform: translate(2px, 0); clip-path: polygon(0 60%, 100% 60%, 100% 85%, 0 85%); }
+            60%  { opacity: 0.65; transform: translate(2px, 0); clip-path: polygon(0 58%, 100% 58%, 100% 82%, 0 82%); }
             100% { opacity: 0; }
         }
 
         @keyframes glitch-b {
             0%   { opacity: 0; }
-            25%  { opacity: 0.7; transform: translate(2px, 1px); clip-path: polygon(0 40%, 100% 40%, 100% 70%, 0 70%); }
+            25%  { opacity: 0.75; transform: translate(2px, 1px); clip-path: polygon(0 38%, 100% 38%, 100% 68%, 0 68%); }
             55%  { opacity: 0; }
-            75%  { opacity: 0.5; transform: translate(-2px, -1px); clip-path: polygon(0 5%, 100% 5%, 100% 30%, 0 30%); }
+            70%  { opacity: 0.55; transform: translate(-2px, -1px); clip-path: polygon(0 5%, 100% 5%, 100% 28%, 0 28%); }
             100% { opacity: 0; }
         }
 
         .status {
             font-family: 'Space Mono', 'SF Mono', 'Fira Code', monospace;
             font-size: 0.6rem;
-            letter-spacing: 0.22em;
+            letter-spacing: 0.2em;
             color: var(--dim);
             text-transform: uppercase;
             display: flex;
@@ -136,7 +131,7 @@
         .cursor {
             display: inline-block;
             width: 5px;
-            height: 0.75em;
+            height: 0.72em;
             background: var(--dim);
             animation: blink 1.1s step-end infinite;
             vertical-align: middle;
@@ -149,49 +144,13 @@
     </style>
 </head>
 <body>
+    <canvas id="aurora"></canvas>
     <div class="grid"></div>
     <div class="vignette"></div>
+    <div class="scanlines"></div>
 
     <div class="stage">
-        <div class="eye-wrap" id="eyeWrap">
-            <svg id="eyeSvg" viewBox="0 0 180 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <clipPath id="eyeClip">
-                        <path d="M 5 40 Q 90 0 175 40 Q 90 80 5 40 Z"/>
-                    </clipPath>
-                </defs>
-
-                <!-- Eye outline -->
-                <path d="M 5 40 Q 90 0 175 40 Q 90 80 5 40 Z"
-                      stroke="rgba(208,208,224,0.85)" stroke-width="1.2" fill="none"/>
-
-                <!-- Clipped eye contents -->
-                <g clip-path="url(#eyeClip)">
-                    <!-- Iris outer ring -->
-                    <circle id="iris" cx="90" cy="40" r="18"
-                            stroke="rgba(208,208,224,0.6)" stroke-width="1" fill="none"/>
-                    <!-- Iris inner detail -->
-                    <circle id="iris2" cx="90" cy="40" r="12"
-                            stroke="rgba(208,208,224,0.2)" stroke-width="0.8"
-                            stroke-dasharray="2 5" fill="none"/>
-                    <!-- Pupil -->
-                    <circle id="pupil" cx="90" cy="40" r="8.5" fill="rgba(208,208,224,0.92)"/>
-                    <!-- Pupil dark centre -->
-                    <circle id="pupilCenter" cx="90" cy="40" r="5.5" fill="#07070f"/>
-                    <!-- Specular highlight -->
-                    <circle id="highlight" cx="94" cy="36" r="1.8" fill="rgba(255,255,255,0.9)"/>
-
-                    <!-- Eyelids (closed over contents during blink) -->
-                    <path id="upperLid" d="M 5 40 Q 90 0 175 40 L 175 -5 L 5 -5 Z"
-                          fill="#07070f" opacity="0"/>
-                    <path id="lowerLid" d="M 5 40 Q 90 80 175 40 L 175 85 L 5 85 Z"
-                          fill="#07070f" opacity="0"/>
-                </g>
-            </svg>
-        </div>
-
         <h1 class="title" data-text="AWOKEN.DEV">AWOKEN.DEV</h1>
-
         <div class="status">
             <span id="statusText"></span>
             <span class="cursor"></span>
@@ -199,71 +158,53 @@
     </div>
 
     <script>
-        // --- Eye tracking ---
-        const movables = ['iris','iris2','pupil','pupilCenter'].map(id => document.getElementById(id));
-        const highlight = document.getElementById('highlight');
-        const CX = 90, CY = 40;
+        // --- Aurora ---
+        const canvas = document.getElementById('aurora');
+        const ctx = canvas.getContext('2d');
+        let W, H;
 
-        document.addEventListener('mousemove', e => {
-            const wrap = document.getElementById('eyeWrap').getBoundingClientRect();
-            const ex = wrap.left + wrap.width / 2;
-            const ey = wrap.top + wrap.height / 2;
-            const dx = e.clientX - ex;
-            const dy = e.clientY - ey;
-            const dist = Math.hypot(dx, dy);
-            const maxShift = 7;
-            const f = Math.min(dist, 350) / 350 * maxShift;
-            const angle = Math.atan2(dy, dx);
-            const ox = Math.cos(angle) * f;
-            const oy = Math.sin(angle) * f;
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
 
-            movables.forEach(el => {
-                el.setAttribute('cx', CX + ox);
-                el.setAttribute('cy', CY + oy);
+        const blobs = [
+            { r: 0.58, rgb: [55,  18, 135], a: 0.23, sx: 0.00017, sy: 0.00013, px: 0.0,  py: 1.1,  ox: 0.16, oy: 0.12 },
+            { r: 0.46, rgb: [8,   42, 115], a: 0.19, sx: 0.00011, sy: 0.00019, px: 2.5,  py: 0.3,  ox: -0.16, oy: -0.1 },
+            { r: 0.40, rgb: [12,  82,  95], a: 0.14, sx: 0.00021, sy: 0.00014, px: 4.8,  py: 3.2,  ox: 0.06,  oy: 0.16 },
+        ];
+
+        function draw(ts) {
+            ctx.clearRect(0, 0, W, H);
+            blobs.forEach(b => {
+                const cx = W * (0.5 + b.ox * Math.sin(ts * b.sx + b.px));
+                const cy = H * (0.5 + b.oy * Math.sin(ts * b.sy + b.py));
+                const rad = b.r * Math.max(W, H);
+                const [r, g, bl] = b.rgb;
+                const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+                g2.addColorStop(0,    `rgba(${r},${g},${bl},${b.a})`);
+                g2.addColorStop(0.45, `rgba(${r},${g},${bl},${(b.a * 0.3).toFixed(3)})`);
+                g2.addColorStop(1,    `rgba(${r},${g},${bl},0)`);
+                ctx.fillStyle = g2;
+                ctx.fillRect(0, 0, W, H);
             });
-            highlight.setAttribute('cx', CX + ox + 4);
-            highlight.setAttribute('cy', CY + oy - 4);
-        });
-
-        // --- Blink ---
-        const upperLid = document.getElementById('upperLid');
-        const lowerLid = document.getElementById('lowerLid');
-
-        function animateLids(from, to, duration, done) {
-            let start = null;
-            (function frame(ts) {
-                if (!start) start = ts;
-                const t = Math.min((ts - start) / duration, 1);
-                const v = from + (to - from) * t;
-                upperLid.setAttribute('opacity', v);
-                lowerLid.setAttribute('opacity', v);
-                if (t < 1) requestAnimationFrame(frame);
-                else if (done) done();
-            })(performance.now());
+            requestAnimationFrame(draw);
         }
-
-        function blink() {
-            animateLids(0, 1, 80, () => {
-                setTimeout(() => animateLids(1, 0, 110, scheduleBlink), 45);
-            });
-        }
-
-        function scheduleBlink() {
-            setTimeout(blink, 2800 + Math.random() * 5000);
-        }
-        scheduleBlink();
+        requestAnimationFrame(draw);
 
         // --- Glitch ---
         const title = document.querySelector('.title');
 
         function triggerGlitch() {
             title.classList.add('glitching');
-            setTimeout(() => title.classList.remove('glitching'), 300);
+            setTimeout(() => title.classList.remove('glitching'), 320);
             setTimeout(triggerGlitch, 5000 + Math.random() * 9000);
         }
         setTimeout(triggerGlitch, 2500);
 
-        // --- Typewriter status ---
+        // --- Typewriter ---
         const messages = [
             'System initializing',
             'Loading context',
@@ -271,29 +212,26 @@
             'Standing by',
             'Awaiting transmission',
         ];
-        let mi = 0, ci = 0, deleting = false;
+        let mi = 0, ci = 0, del = false;
         const statusEl = document.getElementById('statusText');
 
         function type() {
             const msg = messages[mi];
-            if (!deleting) {
+            if (!del) {
                 statusEl.textContent = msg.slice(0, ++ci);
-                if (ci === msg.length) {
-                    deleting = true;
-                    return setTimeout(type, 2200);
-                }
+                if (ci === msg.length) { del = true; return setTimeout(type, 2200); }
                 setTimeout(type, 50 + Math.random() * 30);
             } else {
                 statusEl.textContent = msg.slice(0, --ci);
                 if (ci === 0) {
-                    deleting = false;
+                    del = false;
                     mi = (mi + 1) % messages.length;
                     return setTimeout(type, 380);
                 }
                 setTimeout(type, 28);
             }
         }
-        setTimeout(type, 700);
+        setTimeout(type, 800);
     </script>
 </body>
 </html>
