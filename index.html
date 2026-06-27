@@ -3,125 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>awoken.dev | Coming Soon</title>
+    <title>awoken.dev</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg-color: #0a0a0c;
-            --accent-color: #ffffff;
-            --secondary-color: #333333;
-            --glow-color: rgba(255, 255, 255, 0.15);
+            --bg: #07070f;
+            --fg: #d0d0e0;
+            --dim: #3a3a50;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--fg);
+        }
+
+        /* Scan-lines */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.06) 3px,
+                rgba(0,0,0,0.06) 4px
+            );
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        .grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+            background-size: 55px 55px;
+            z-index: 1;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.82) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .stage {
+            position: fixed;
+            inset: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: var(--bg-color);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: var(--accent-color);
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
             z-index: 10;
         }
 
-        /* The Visual: The Eye */
-        .eye-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .eye-wrap {
+            width: 180px;
+            margin-bottom: 52px;
         }
 
-        .eye-outer {
+        .eye-wrap svg {
             width: 100%;
-            height: 60%;
-            border: 2px solid var(--accent-color);
-            border-radius: 100% 0;
-            transform: rotate(45deg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: all 0.5s ease;
-            box-shadow: 0 0 20px var(--glow-color);
-            animation: pulse 4s infinite ease-in-out;
+            overflow: visible;
+            filter:
+                drop-shadow(0 0 10px rgba(180,180,220,0.18))
+                drop-shadow(0 0 30px rgba(180,180,220,0.07));
         }
 
-        .iris {
-            width: 40px;
-            height: 40px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
+        .title {
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 200;
+            letter-spacing: 0.65em;
+            text-transform: uppercase;
+            color: var(--fg);
+            margin-bottom: 20px;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        .pupil {
-            width: 15px;
-            height: 15px;
-            background-color: var(--bg-color);
-            border-radius: 50%;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: rotate(45deg) scale(1); opacity: 0.8; }
-            50% { transform: rotate(45deg) scale(1.05); opacity: 1; box-shadow: 0 0 40px var(--glow-color); }
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            letter-spacing: 0.5rem;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-
-        p {
-            font-size: 0.8rem;
-            color: #666;
-            letter-spacing: 0.2rem;
-            text-transform: uppercase;
-        }
-
-        .background-lines {
+        .title::before,
+        .title::after {
+            content: attr(data-text);
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: 1;
+            top: 0; left: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .title::before { color: #9090ff; }
+        .title::after  { color: #ff7070; }
+
+        .title.glitching::before { animation: glitch-a 0.28s steps(1) forwards; }
+        .title.glitching::after  { animation: glitch-b 0.28s steps(1) forwards; }
+
+        @keyframes glitch-a {
+            0%   { opacity: 0; }
+            15%  { opacity: 0.8; transform: translate(-2px, 0); clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%); }
+            45%  { opacity: 0; }
+            65%  { opacity: 0.6; transform: translate(2px, 0); clip-path: polygon(0 60%, 100% 60%, 100% 85%, 0 85%); }
+            100% { opacity: 0; }
+        }
+
+        @keyframes glitch-b {
+            0%   { opacity: 0; }
+            25%  { opacity: 0.7; transform: translate(2px, 1px); clip-path: polygon(0 40%, 100% 40%, 100% 70%, 0 70%); }
+            55%  { opacity: 0; }
+            75%  { opacity: 0.5; transform: translate(-2px, -1px); clip-path: polygon(0 5%, 100% 5%, 100% 30%, 0 30%); }
+            100% { opacity: 0; }
+        }
+
+        .status {
+            font-family: 'Space Mono', 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.22em;
+            color: var(--dim);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 1em;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 5px;
+            height: 0.75em;
+            background: var(--dim);
+            animation: blink 1.1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="background-lines"></div>
-    
-    <div class="container">
-        <div class="eye-container">
-            <div class="eye-outer">
-                <div class="iris">
-                    <div class="pupil"></div>
-                </div>
-            </div>
+    <div class="grid"></div>
+    <div class="vignette"></div>
+
+    <div class="stage">
+        <div class="eye-wrap" id="eyeWrap">
+            <svg id="eyeSvg" viewBox="0 0 180 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <clipPath id="eyeClip">
+                        <path d="M 5 40 Q 90 0 175 40 Q 90 80 5 40 Z"/>
+                    </clipPath>
+                </defs>
+
+                <!-- Eye outline -->
+                <path d="M 5 40 Q 90 0 175 40 Q 90 80 5 40 Z"
+                      stroke="rgba(208,208,224,0.85)" stroke-width="1.2" fill="none"/>
+
+                <!-- Clipped eye contents -->
+                <g clip-path="url(#eyeClip)">
+                    <!-- Iris outer ring -->
+                    <circle id="iris" cx="90" cy="40" r="18"
+                            stroke="rgba(208,208,224,0.6)" stroke-width="1" fill="none"/>
+                    <!-- Iris inner detail -->
+                    <circle id="iris2" cx="90" cy="40" r="12"
+                            stroke="rgba(208,208,224,0.2)" stroke-width="0.8"
+                            stroke-dasharray="2 5" fill="none"/>
+                    <!-- Pupil -->
+                    <circle id="pupil" cx="90" cy="40" r="8.5" fill="rgba(208,208,224,0.92)"/>
+                    <!-- Pupil dark centre -->
+                    <circle id="pupilCenter" cx="90" cy="40" r="5.5" fill="#07070f"/>
+                    <!-- Specular highlight -->
+                    <circle id="highlight" cx="94" cy="36" r="1.8" fill="rgba(255,255,255,0.9)"/>
+
+                    <!-- Eyelids (closed over contents during blink) -->
+                    <path id="upperLid" d="M 5 40 Q 90 0 175 40 L 175 -5 L 5 -5 Z"
+                          fill="#07070f" opacity="0"/>
+                    <path id="lowerLid" d="M 5 40 Q 90 80 175 40 L 175 85 L 5 85 Z"
+                          fill="#07070f" opacity="0"/>
+                </g>
+            </svg>
         </div>
-        <h1>awoken.dev</h1>
-        <p>System Initializing</p>
+
+        <h1 class="title" data-text="AWOKEN.DEV">AWOKEN.DEV</h1>
+
+        <div class="status">
+            <span id="statusText"></span>
+            <span class="cursor"></span>
+        </div>
     </div>
+
+    <script>
+        // --- Eye tracking ---
+        const movables = ['iris','iris2','pupil','pupilCenter'].map(id => document.getElementById(id));
+        const highlight = document.getElementById('highlight');
+        const CX = 90, CY = 40;
+
+        document.addEventListener('mousemove', e => {
+            const wrap = document.getElementById('eyeWrap').getBoundingClientRect();
+            const ex = wrap.left + wrap.width / 2;
+            const ey = wrap.top + wrap.height / 2;
+            const dx = e.clientX - ex;
+            const dy = e.clientY - ey;
+            const dist = Math.hypot(dx, dy);
+            const maxShift = 7;
+            const f = Math.min(dist, 350) / 350 * maxShift;
+            const angle = Math.atan2(dy, dx);
+            const ox = Math.cos(angle) * f;
+            const oy = Math.sin(angle) * f;
+
+            movables.forEach(el => {
+                el.setAttribute('cx', CX + ox);
+                el.setAttribute('cy', CY + oy);
+            });
+            highlight.setAttribute('cx', CX + ox + 4);
+            highlight.setAttribute('cy', CY + oy - 4);
+        });
+
+        // --- Blink ---
+        const upperLid = document.getElementById('upperLid');
+        const lowerLid = document.getElementById('lowerLid');
+
+        function animateLids(from, to, duration, done) {
+            let start = null;
+            (function frame(ts) {
+                if (!start) start = ts;
+                const t = Math.min((ts - start) / duration, 1);
+                const v = from + (to - from) * t;
+                upperLid.setAttribute('opacity', v);
+                lowerLid.setAttribute('opacity', v);
+                if (t < 1) requestAnimationFrame(frame);
+                else if (done) done();
+            })(performance.now());
+        }
+
+        function blink() {
+            animateLids(0, 1, 80, () => {
+                setTimeout(() => animateLids(1, 0, 110, scheduleBlink), 45);
+            });
+        }
+
+        function scheduleBlink() {
+            setTimeout(blink, 2800 + Math.random() * 5000);
+        }
+        scheduleBlink();
+
+        // --- Glitch ---
+        const title = document.querySelector('.title');
+
+        function triggerGlitch() {
+            title.classList.add('glitching');
+            setTimeout(() => title.classList.remove('glitching'), 300);
+            setTimeout(triggerGlitch, 5000 + Math.random() * 9000);
+        }
+        setTimeout(triggerGlitch, 2500);
+
+        // --- Typewriter status ---
+        const messages = [
+            'System initializing',
+            'Loading context',
+            'Signal acquired',
+            'Standing by',
+            'Awaiting transmission',
+        ];
+        let mi = 0, ci = 0, deleting = false;
+        const statusEl = document.getElementById('statusText');
+
+        function type() {
+            const msg = messages[mi];
+            if (!deleting) {
+                statusEl.textContent = msg.slice(0, ++ci);
+                if (ci === msg.length) {
+                    deleting = true;
+                    return setTimeout(type, 2200);
+                }
+                setTimeout(type, 50 + Math.random() * 30);
+            } else {
+                statusEl.textContent = msg.slice(0, --ci);
+                if (ci === 0) {
+                    deleting = false;
+                    mi = (mi + 1) % messages.length;
+                    return setTimeout(type, 380);
+                }
+                setTimeout(type, 28);
+            }
+        }
+        setTimeout(type, 700);
+    </script>
 </body>
 </html>
